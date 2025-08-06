@@ -1,0 +1,60 @@
+{% extends 'society/base.html' %}
+
+{% block content %}
+<div class="container-fluid d-flex justify-content-center align-items-center" style="min-height: 50vh;">
+    <div class="card shadow p-4 w-100" style="max-width: 500px;">
+        <h3 class="text-center mb-3">Vehicle's Entry</h3>
+
+        <!-- Display errors -->
+        {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+            <ul class="mb-0">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li><strong>{{ field|capfirst }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Form -->
+        <form method="post" novalidate onsubmit="return confirmEntry();">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="vehicle_number" class="form-label">{{ form.vehicle_number.label }}</label>
+                {{ form.vehicle_number }}
+            </div>
+
+            <div class="row">
+                <div class="col-6 d-grid">
+                    <button type="submit" name="action" value="ENTRY" class="btn btn-success btn-sm">ENTRY</button>
+                </div>
+                <div class="col-6 d-grid">
+                    <button type="submit" name="action" value="EXIT" class="btn btn-danger">EXIT</button>
+                </div>
+            </div>
+        </form>
+        <div class="text-center mb-3" style="margin-top: 1rem;">
+            <a href="{% url 'vehicle-entries-list' %}" class="text-decoration-none">List of entries</a>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmations -->
+<script>
+    function confirmEntry() {
+        return confirm("Are you sure?");
+    }
+
+    function confirmExit() {
+        return confirm("Are you sure you want to go back (EXIT)?");
+    }
+</script>
+{% endblock %}

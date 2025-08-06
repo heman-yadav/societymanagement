@@ -1,0 +1,134 @@
+{% extends 'society/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2 class="text-center mb-4">Complaints List</h2>
+
+  <!-- Search Box -->
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <!-- Left: Create Complaint Link -->
+        <a href="{% url 'complaints' %}" class="btn btn-light">
+            Create Complaint
+        </a>
+        <!-- Right: Search Box -->
+        <input type="text" id="searchInput" class="form-control w-25" placeholder="Search complaints..." onkeyup="filterTable()">
+    </div>
+
+  <!-- Table -->
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-sm" id="complaintsTable">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          {% if request.user.is_superuser %}
+           <th>User</th>
+           <th>Flat</th>
+          {% endif %}
+          <th>Category</th>
+          <th>Priority</th>
+          <th>Status</th>
+          <th>Description</th>
+          <th>Date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for object in object_list %}
+        <tr>
+          <td>{{ object.id }}</td>
+          {% if request.user.is_superuser %}
+            <td>{{ object.user }}</td>
+            <td>{{ object.user.flat }}</td>
+          {% endif %}
+          <td>{{ object.category }}</td>
+          <td>
+            {% if object.status.value == 'Not Started' %}
+                <span class="badge bg-secondary">{{ object.status }}</span>
+            {% elif object.status.value == 'In Process' %}
+                <span class="badge bg-info text-dark">{{ object.status }}</span>
+            {% elif object.status.value == 'Completed' %}
+                <span class="badge bg-success">{{ object.status }}</span>
+            {% else %}
+                <span class="badge bg-danger">{{ object.status }}</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if object.priority.value == 'Low' %}
+                <span class="badge bg-secondary">{{ object.status }}</span>
+            {% elif object.priority.value == 'Medium' %}
+                <span class="badge bg-warning">{{ object.status }}</span>
+            {% elif object.priority.value == 'High' %}
+                <span class="badge bg-danger">{{ object.status }}</span>
+
+            {% endif %}
+          </td>
+          <td>
+            {% if object.description|length > 50 %}
+              {{ object.description|truncatechars:30 }}...
+              <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#descModal{{ object.id }}">Show More</a>
+
+              <!-- Modal -->
+              <div class="modal fade" id="descModal{{ object.id }}" tabindex="-1" aria-labelledby="descModalLabel{{ object.id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-scrollable">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="descModalLabel{{ object.id }}">Complaint Description</h5>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                      {{ object.description }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {% else %}
+              {{ object.description }}
+            {% endif %}
+          </td>
+          <td>{{ object.created_at }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center">No complaints found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <nav>
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+
+<!-- JavaScript filter -->
+<script>
+  function filterTable() {
+    let input = document.getElementById("searchInput").value.toLowerCase();
+    let rows = document.querySelectorAll("#complaintsTable tbody tr");
+    rows.forEach(row => {
+      let text = row.innerText.toLowerCase();
+      row.style.display = text.includes(input) ? "" : "none";
+    });
+  }
+</script>
+{% endblock %}
