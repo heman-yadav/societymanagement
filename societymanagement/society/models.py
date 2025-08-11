@@ -5,39 +5,6 @@ from phonenumber_field.modelfields import PhoneNumberField
 from django.conf import settings
 import uuid
 
-# Create your models here.
-# class MasterData(models.Model):
-#     TYPE_CHOICES = [
-#         ('complaint_category', 'Complaint Category'),
-#         ('visitor_purpose', 'Visitor Purpose'),
-#         ('vehicle_type', 'Vehicle Type'),
-#         ('id_proof_type', 'ID Proof Type'),
-#         ('floor', 'Floor'),
-#         ('status', 'Status'),
-#         ('priority', 'Priority')
-#     ]
-
-#     VALUE_CHOICES = [
-#         ('plumbing', 'Plumbing'),
-#         ('electricity', 'Electricity'),
-#         ('security', 'Security'),
-#         ('cleaning', 'Cleaning'),
-#         ('water_supply', 'Water Supply'),
-#         ('parking', 'Parking'),
-#         ('other', 'Other')
-#     ]
-#     type = models.CharField(max_length=50, choices=TYPE_CHOICES)
-#     value = models.CharField(max_length=50, choices=VALUE_CHOICES)
-#     display_order = models.IntegerField(default=0)
-#     is_active = models.BooleanField(default=True)
-#     created_at = models.DateTimeField(auto_now_add=True)
-
-#     class Meta:
-#         db_table = 'master_data'
-
-#     def __str__(self):
-#         return self.value
-
 class MasterType(models.Model):
     code = models.CharField(max_length=50, unique=True)
     name = models.CharField(max_length=100)
@@ -79,7 +46,7 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = []
 
     def __str__(self):
-        return self.first_name
+        return self.first_name + " " + self.last_name
 
 # models.py
 
@@ -102,12 +69,19 @@ class VehicleEntries(models.Model):
     vehicle_registered = models.BooleanField(default=True)
     created_by =  models.DateTimeField(auto_now=True)
 
-# class Visitor(models.Model):
-#     uid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
-#     name = models.CharField(max_length=100)
-#     flat = models.CharField(max_length=10)
-#     entry_time = models.DateTimeField(auto_now_add=True)
-#     updated_at =  models.DateTimeField(auto_now=True)
+
+class VisitorEntries(models.Model):
+    flat = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_column='flat', related_name='flat_num_reqest')
+    visitor_name = models.CharField(max_length=100)
+    purpose = models.ForeignKey(MasterValue, on_delete=models.CASCADE, limit_choices_to={'type__code': 'visitor_purpose'}, related_name='visitor_purpose')
+    status = models.ForeignKey(MasterValue, on_delete=models.CASCADE, limit_choices_to={'type__code': 'status'}, related_name='visitor_req_status')
+    requested_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='gatekeeper_requests')
+    approved_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='resident_approvals')
+    created_at = models.DateTimeField(auto_now_add=True)
+    approved_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.visitor_name} for flat {self.flat}"
 
 # class Notice(models.Model):
 #     uid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
@@ -115,3 +89,6 @@ class VehicleEntries(models.Model):
 #     content = models.TextField()
 #     date_posted = models.DateTimeField(auto_now_add=True)
 #     updated_at =  models.DateTimeField(auto_now=True)
+
+
+

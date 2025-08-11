@@ -11,7 +11,7 @@ from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from .forms import *
 from .utils import send_email
-
+from datetime import datetime
 
 # Create your views here.
 class RegistrationView(CreateView):
@@ -143,6 +143,59 @@ class VehicleEntriesListView(LoginRequiredMixin, ListView):
     template_name = 'society/cars_entry_list.html'
 
 
+class VisitorRequestCreateView(LoginRequiredMixin, CreateView):
+    model = VisitorEntries
+    form_class = CreateVisitorReqeustForm
+    template_name = 'society/visitor.html'
+    success_url = '/create-visitor-request/'
 
-# class ProfileView(TemplateView):
-#     template_name = 'society/profile.html'
+    def form_valid(self, form):
+        flat_number = form.cleaned_data.get('flat', None)
+        master_value = MasterValue.objects.get(value='Not Started')
+        resident = CustomUser.objects.filter(flat=flat_number, is_active=True) 
+        # form.instance.created_by = self.request.user
+        form_data = form.save(commit=False)
+        form_data.status = master_value
+        form_data.requested_by = self.request.user
+        form_data.resident = resident
+        response = super().form_valid(form)
+        form_data.save()
+        # Notify resident
+        # resident = form.instance.flat.resident
+        # Notification.objects.create(
+        #     user=resident,
+        #     message=f"New visitor request from gatekeeper: {form.instance.visitor_name}",
+        #     visitor_request=form.instance
+        # )
+        return response
+    
+class VisitorRequestListView(LoginRequiredMixin, ListView):
+    model = VisitorEntries
+    paginate_by = 7
+    template_name = "society/visitor_list.html"
+
+# class ApproveRejectVitisorUpdateView(LoginRequiredMixin, UpdateView):
+#     model = VisitorEntries
+#     success_url = "visitor-list"
+
+class ApproveRejectVitisorUpdateView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        visitor = VisitorEntries.objects.get(pk=pk)
+        action = request.POST.get("action")
+        try:
+            status = MasterValue.objects.get(value=action.strip())
+            if action == "Approved":
+                visitor.status = status
+                messages.success(self.request, "Visitor Request Approved Successfully.")
+            elif action == "Rejected":
+                visitor.status = status
+                messages.success(self.request, "Visitor Request Rejected Successfully.")
+            visitor.approved_by = self.request.user
+            visitor.approved_at = datetime.now()
+            visitor.save()
+        except:
+            messages.error(self.request, "Some thing went wrong. Try Again")
+            return redirect(request.META.get('HTTP_REFERER', 'visitor-list'))
+
+        # Redirect back to the page user came from
+        return redirect(request.META.get('HTTP_REFERER', 'visitor-list'))

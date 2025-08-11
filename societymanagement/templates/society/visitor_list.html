@@ -1,0 +1,146 @@
+{% extends 'society/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <!-- Display errors -->
+        {% if form.errors %}
+        <div class="alert alert-danger" role="alert">
+            <ul class="mb-0">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <li><strong>{{ field|capfirst }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} text-center  ">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+  <h2 class="text-center mb-4">Vehicle Entries List</h2>
+
+  <!-- Search Box -->
+    <div class="mb-3 d-flex justify-content-between align-items-center">
+        <!-- Left: Create Complaint Link -->
+        <a href="{% url 'create-visitor-request' %}" class="btn btn-light">
+            Create Visitor Entry
+        </a>
+        
+        <!-- Right: Search Box -->
+        <input type="text" id="searchInput" class="form-control w-25" placeholder="Search complaints..." onkeyup="filterTable()">
+    </div>
+
+  <!-- Table -->
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-sm" id="complaintsTable">
+      <thead class="table-dark">
+        <tr>
+          <th>ID</th>
+          <th>Visitor Name</th>
+          <th>Flat Number</th>
+          <th>Status</th>
+          <th>Approved BY</th>
+          <th>Requested By</th>
+          <th>Created At</th>
+          <th>Approved At</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for object in object_list %}
+        <tr>
+          <td>{{ object.id }}</td>
+          <td>{{ object.visitor_name }}</td>
+          <td>{{ object.flat.flat }}</td>
+          <td>
+            {% if object.status.value == 'Pending' %}
+                <span class="badge bg-secondary">{{ object.status.value }}</span>
+            {% elif object.status.value == 'Approved' %}
+                <span class="badge bg-success">{{ object.status.value }}</span>
+            {% else %}
+                <span class="badge bg-danger">{{ object.status.value }}</span>
+            {% endif %}
+          </td>
+          <td>{{ object.approved_by }}</td>
+          <td>{{ object.requested_by }}</td>
+          <td>{{ object.created_at }}</td>
+          <td>{{ object.approved_at }}</td>
+          <td>
+            <form method="post" action="{% url 'visitor-approve-reject' object.id %}">
+                {% csrf_token %}
+                <div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                    <button type="submit" name="action" value="Approved" class="btn btn-outline-success">Approve</button>
+                    <button type="submit" name="action" value="Rejected" class="btn btn-outline-danger">Reject</button>
+                </div>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="5" class="text-center">No complaints found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <!-- Pagination -->
+  <nav>
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+      {% endif %}
+
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <li class="page-item"><a class="page-link" href="?page={{ num }}">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+        <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+      {% else %}
+        <li class="page-item disabled"><span class="page-link">Next</span></li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+
+<!-- JavaScript filter -->
+<script>
+  function filterTable() {
+    let input = document.getElementById("searchInput").value.toLowerCase();
+    let rows = document.querySelectorAll("#complaintsTable tbody tr");
+    rows.forEach(row => {
+      let text = row.innerText.toLowerCase();
+      row.style.display = text.includes(input) ? "" : "none";
+    });
+  }
+</script>
+{% endblock %}

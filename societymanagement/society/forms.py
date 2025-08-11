@@ -124,3 +124,18 @@ class VehicleEntreisModelForm(forms.ModelForm):
         widgets = {
             'vehicle_number': forms.TextInput(attrs={'class': 'form-control text-uppercase', 'required': True, 'placeholder': 'UP14AB0000'}),
         }
+
+
+class CreateVisitorReqeustForm(forms.ModelForm):
+    class Meta:
+        model = VisitorEntries
+        fields = ['flat', 'visitor_name', 'purpose']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # showing flat number instead of username name
+        self.fields['flat'].queryset = CustomUser.objects.filter(is_active=True).order_by('flat')
+        self.fields['flat'].label_from_instance = lambda obj: obj.flat
+        self.fields['flat'].widget.attrs['class'] = 'form-control'
+        self.fields['visitor_name'].widget.attrs['class'] = 'form-control'
+        self.fields['purpose'].widget.attrs['class'] = 'form-control'
