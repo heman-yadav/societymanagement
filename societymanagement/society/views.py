@@ -44,7 +44,7 @@ class RegistrationView(CreateView):
             )
         return super().form_valid(form)
     
-class UserProfileUpdateView(UpdateView):
+class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = CustomUser
     slug_field = 'uid'
     form_class = UserProfileUpdateForm
@@ -53,7 +53,7 @@ class UserProfileUpdateView(UpdateView):
 
     
     def get_object(self, queryset=None):
-        return get_object_or_404(CustomUser, uid=self.kwargs['uid'])
+        return get_object_or_404(self.model, uid=self.kwargs['uid'])
 
 
 class LoginView(View):
@@ -83,6 +83,7 @@ class LogoutView(View):
         logout(request)
         return redirect('login')
 
+
 class DashboardView(LoginRequiredMixin,TemplateView):
     model = Complaint
     template_name = "society/dashboard.html"
@@ -91,7 +92,7 @@ class DashboardView(LoginRequiredMixin,TemplateView):
 class ComplaintCreateView(LoginRequiredMixin, CreateView):
     form_class = ComplaintModelForm
     template_name = 'society/complaint.html'
-    success_url = reverse_lazy('complaints')
+    success_url = reverse_lazy('complaints-list')
 
     def form_valid(self, form):
         not_started_object = MasterValue.objects.filter(value='Not Started').first()
@@ -100,6 +101,7 @@ class ComplaintCreateView(LoginRequiredMixin, CreateView):
         form_data.user = user
         form_data.status = not_started_object
         form_data.save()
+        messages.success(self.request, "Complaint registered successfully!")
         return super().form_valid(form)
 
 
@@ -107,6 +109,34 @@ class ComplaintListView(LoginRequiredMixin, ListView):
     model = Complaint
     paginate_by = 7
     template_name = 'society/complaints.html'
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        # Admins can see all complaints
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            return qs
+        # Normal users see only their own complaints
+        return qs.filter(user=self.request.user)
+
+
+class ComplaintUpdateView(LoginRequiredMixin, UpdateView):
+    model = Complaint
+    slug_field = 'uid'
+    form_class = ComplaintUpdateModelForm
+    template_name = "society/complaint_update.html"
+    success_url = reverse_lazy('complaints-list')
+
+    def get_object(self, queryset=None):
+        return get_object_or_404(self.model, uid=self.kwargs['uid'])
+    
+    def form_valid(self, form):
+        messages.success(self.request, "Complaint updated successfully!")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, "There was an error updating the complaint.")
+        return super().form_invalid(form)
 
 
 class VehicleEntriesCreateView(LoginRequiredMixin, CreateView):
@@ -142,6 +172,15 @@ class VehicleEntriesListView(LoginRequiredMixin, ListView):
     paginate_by = 7
     template_name = 'society/cars_entry_list.html'
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        # Admins can see all entries
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            return qs
+        # Normal users see only their own car entries
+        return qs.filter(vehicle_number__in=[self.request.user.bike_number, self.request.user.car_number])
+
 
 class VisitorRequestCreateView(LoginRequiredMixin, CreateView):
     model = VisitorEntries
@@ -151,7 +190,7 @@ class VisitorRequestCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         flat_number = form.cleaned_data.get('flat', None)
-        master_value = MasterValue.objects.get(value='Not Started')
+        master_value = MasterValue.objects.get(value='Pending')
         resident = CustomUser.objects.filter(flat=flat_number, is_active=True) 
         # form.instance.created_by = self.request.user
         form_data = form.save(commit=False)
@@ -174,6 +213,15 @@ class VisitorRequestListView(LoginRequiredMixin, ListView):
     paginate_by = 7
     template_name = "society/visitor_list.html"
 
+    def get_queryset(self):
+        qs = super().get_queryset()
+
+        # Admins can see all entries
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            return qs
+        # Normal users see only approve and reject their visitors request
+        return qs.filter(flat=self.request.user)
+
 # class ApproveRejectVitisorUpdateView(LoginRequiredMixin, UpdateView):
 #     model = VisitorEntries
 #     success_url = "visitor-list"
@@ -184,12 +232,20 @@ class ApproveRejectVitisorUpdateView(LoginRequiredMixin, View):
         action = request.POST.get("action")
         try:
             status = MasterValue.objects.get(value=action.strip())
-            if action == "Approved":
-                visitor.status = status
-                messages.success(self.request, "Visitor Request Approved Successfully.")
-            elif action == "Rejected":
-                visitor.status = status
-                messages.success(self.request, "Visitor Request Rejected Successfully.")
+            if visitor.status.value == 'Approved':
+                messages.info(self.request, "Request already approved you can't Reject.")
+                return redirect(request.META.get('HTTP_REFERER', 'visitor-list')) 
+            elif visitor.status.value == 'Pending':    
+                if action == "Approved":
+                    visitor.status = status
+                    messages.success(self.request, "Visitor Request Approved Successfully.")
+                elif action == "Rejected":
+                    visitor.status = status
+                    messages.success(self.request, "Visitor Request Rejected Successfully.")
+            elif visitor.status.value == 'Rejected':    
+                if action == "Approved":
+                    visitor.status = status
+                    messages.success(self.request, "Visitor Request Approved Successfully.")
             visitor.approved_by = self.request.user
             visitor.approved_at = datetime.now()
             visitor.save()
@@ -199,3 +255,18 @@ class ApproveRejectVitisorUpdateView(LoginRequiredMixin, View):
 
         # Redirect back to the page user came from
         return redirect(request.META.get('HTTP_REFERER', 'visitor-list'))
+    
+
+class NoticeBoardView(LoginRequiredMixin, ListView):
+    model = Notice
+    template_name = 'society/notice_feed.html'
+    context_object_name = 'notices'
+
+    def get_queryset(self):
+        return Notice.objects.order_by('-created_at')
+    
+class PublishNoticeCreateView(LoginRequiredMixin, CreateView):
+    model = Notice
+    template_name = "notice_create.html"
+    form_class = PublishNoticeInfoForm
+    success_url = reverse_lazy('notice-feed')

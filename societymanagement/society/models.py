@@ -48,7 +48,6 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.first_name + " " + self.last_name
 
-# models.py
 
 class Complaint(models.Model):
     uid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
@@ -59,6 +58,9 @@ class Complaint(models.Model):
     description = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at =  models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user} for flat {self.category}"
     
 
 class VehicleEntries(models.Model):
@@ -68,6 +70,9 @@ class VehicleEntries(models.Model):
     time = models.DateTimeField(auto_now_add=True)
     vehicle_registered = models.BooleanField(default=True)
     created_by =  models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.vehicle_number} for flat {self.status}"
 
 
 class VisitorEntries(models.Model):
@@ -90,5 +95,19 @@ class VisitorEntries(models.Model):
 #     date_posted = models.DateTimeField(auto_now_add=True)
 #     updated_at =  models.DateTimeField(auto_now=True)
 
+# models.py
+class Notice(models.Model):
+    uid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    title = models.CharField(max_length=200)
+    message = models.TextField(blank=True)
+    image = models.ImageField(upload_to='notices/', blank=True, null=True)
+    crated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']  # ensures latest first by default
+
+    def __str__(self):
+        return self.title
 
 

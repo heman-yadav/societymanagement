@@ -4,7 +4,7 @@
 <div class="container d-flex justify-content-center align-items-center"
     style="min-height: 80vh;">
     <div class="card shadow p-4" style="width: 100%; max-width: 600px;">
-        <h3 class="text-center mb-4">Register New Complaint</h3>
+        <h3 class="text-center mb-4">Create New Notice</h3>
         <a href="{% url 'complaints-list' %}">
             <h6 class="text-center mb-4">List of registered complaints</h6>
         </a>
@@ -32,18 +32,18 @@
             {% csrf_token %}
             <div class="row mb-3">
                 <div class="col-md-6">
-                    <label for="category" class="form-label">{{form.category.label }}</label>
-                    {{ form.category }}
+                    <label for="title" class="form-label">{{form.title.label }}</label>
+                    {{ form.title }}
                 </div>
                 <div class="col-md-6">
-                    <label for="priority" class="form-label">{{form.priority.label }}</label>
-                    {{ form.priority }}
+                    <label for="image" class="form-label">{{form.image.label }}</label>
+                    {{ form.image }}
                 </div>
             </div>
 
             <div class="mb-3">
-                <label for="description" class="form-label">{{ form.description.label }}</label>
-                {{ form.description }}
+                <label for="message" class="form-label">{{ form.message.label }}</label>
+                {{ form.message }}
             </div>
 
             <div class="d-grid gap-2">

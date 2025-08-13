@@ -116,6 +116,26 @@ class ComplaintModelForm(forms.ModelForm):
             'priority': forms.Select(attrs={'class': 'form-select'}),
         }
 
+
+class ComplaintUpdateModelForm(forms.ModelForm):
+    class Meta:
+        model = Complaint
+        fields = ['status' ,'category', 'priority', 'description']
+        widgets = {
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 4}),
+            'category': forms.Select(attrs={'class': 'form-select'}),
+            'priority': forms.Select(attrs={'class': 'form-select'}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        allowed_statuses = ['Not Started', 'In Process', 'Completed']
+        self.fields['status'].queryset = self.fields['status'].queryset.filter(value__in=allowed_statuses)
+
+
+
 class VehicleEntreisModelForm(forms.ModelForm):
     class Meta:
         model = VehicleEntries
@@ -139,3 +159,15 @@ class CreateVisitorReqeustForm(forms.ModelForm):
         self.fields['flat'].widget.attrs['class'] = 'form-control'
         self.fields['visitor_name'].widget.attrs['class'] = 'form-control'
         self.fields['purpose'].widget.attrs['class'] = 'form-control'
+
+
+class PublishNoticeInfoForm(forms.ModelForm):
+    class Meta:
+        model = Notice
+        fields = ['title', 'message', 'image']
+
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'required': True, 'placeholder': 'Enter Title'}),
+            'message': forms.Textarea(attrs={'class': 'form-control', 'required': True, 'placeholder': 'Enter you message', 'rows': 3}),
+            'image': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }

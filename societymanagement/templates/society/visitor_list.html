@@ -18,7 +18,7 @@
 
         {% if messages %}
             {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} text-center  ">{{ message }}</div>
+            <div class="alert alert-{{ message.tags }} text-center">{{ message }}</div>
             {% endfor %}
         {% endif %}
   <h2 class="text-center mb-4">Vehicle Entries List</h2>
@@ -41,7 +41,7 @@
         <tr>
           <th>ID</th>
           <th>Visitor Name</th>
-          <th>Flat Number</th>
+          <th>Flat</th>
           <th>Status</th>
           <th>Approved BY</th>
           <th>Requested By</th>
@@ -70,13 +70,21 @@
           <td>{{ object.created_at }}</td>
           <td>{{ object.approved_at }}</td>
           <td>
-            <form method="post" action="{% url 'visitor-approve-reject' object.id %}">
-                {% csrf_token %}
-                <div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
-                    <button type="submit" name="action" value="Approved" class="btn btn-outline-success">Approve</button>
-                    <button type="submit" name="action" value="Rejected" class="btn btn-outline-danger">Reject</button>
-                </div>
-            </form>
+              <form method="post" action="{% url 'visitor-approve-reject' object.id %}">
+                  {% csrf_token %}
+                  <div class="btn-group btn-group-sm" role="group" aria-label="Small button group">
+                    {% if object.status.value == 'Approved' %}
+                      <button type="submit" name="action" value="Approved" class="btn btn-outline-success disabled">Approve</button>
+                      <button type="submit" name="action" value="Rejected" class="btn btn-outline-danger disabled">Reject</button>
+                    {% elif object.status.value == 'Pending' %}
+                      <button type="submit" name="action" value="Approved" class="btn btn-outline-success">Approve</button>
+                      <button type="submit" name="action" value="Rejected" class="btn btn-outline-danger">Reject</button>
+                    {% elif object.status.value == 'Rejected' %}
+                      <button type="submit" name="action" value="Approved" class="btn btn-outline-success">Approve</button>
+                      <button type="submit" name="action" value="Rejected" class="btn btn-outline-danger disabled">Reject</button>
+                    {% endif %}
+                  </div>
+              </form>
           </td>
         </tr>
         {% empty %}
@@ -85,26 +93,6 @@
       </tbody>
     </table>
   </div>
-
-
-<!-- Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
-      </div>
-    </div>
-  </div>
-</div>
 
   <!-- Pagination -->
   <nav>

@@ -4,26 +4,23 @@
 <div class="container d-flex justify-content-center align-items-center"
     style="min-height: 80vh;">
     <div class="card shadow p-4" style="width: 100%; max-width: 600px;">
-        <h3 class="text-center mb-4">Register New Complaint</h3>
-        <a href="{% url 'complaints-list' %}">
-            <h6 class="text-center mb-4">List of registered complaints</h6>
-        </a>
+        <h3 class="text-center mb-4">Update Complaint Details</h3>
         <!-- Display Django form or message errors -->
         {% if form.errors %}
-            <div class="alert alert-danger" role="alert">
-                <ul class="mb-0">
-                    {% for field, errors in form.errors.items %}
-                    {% for error in errors %}
-                    <li><strong>{{ field|capfirst }}:</strong> {{ error }}</li>
-                    {% endfor %}
-                    {% endfor %}
-                </ul>
-            </div>
+        <div class="alert alert-danger" role="alert">
+            <ul class="mb-0">
+                {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                <li><strong>{{ field|capfirst }}:</strong> {{ error }}</li>
+                {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
         {% endif %}
 
         {% if messages %}
             {% for message in messages %}
-                <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">{{ message }}</div>
+                <div class="alert alert-{{ message.tags }}">{{ message }}</div>
             {% endfor %}
         {% endif %}
 
@@ -31,11 +28,15 @@
         <form method="post" novalidate>
             {% csrf_token %}
             <div class="row mb-3">
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <label for="status" class="form-label">{{form.status.label }}</label>
+                    {{ form.status }}
+                </div>
+                <div class="col-md-4">
                     <label for="category" class="form-label">{{form.category.label }}</label>
                     {{ form.category }}
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <label for="priority" class="form-label">{{form.priority.label }}</label>
                     {{ form.priority }}
                 </div>
@@ -47,8 +48,8 @@
             </div>
 
             <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-success">SUBMIT</button>
-                <a href="{% url 'dashboard' %}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-success">UPDATE</button>
+                <a href="{% url 'complaints-list' %}" class="btn btn-secondary">CANCEL</a>
             </div>
         </form>
     </div>

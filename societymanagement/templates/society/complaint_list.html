@@ -3,8 +3,24 @@
 
 {% block content %}
 <div class="container mt-5">
-  <h2 class="text-center mb-4">Complaints List</h2>
+  {% if form.errors %}
+    <div class="alert alert-danger" role="alert">
+        <ul class="mb-0">
+            {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+            <li><strong>{{ field|capfirst }}:</strong> {{ error }}</li>
+            {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+  {% endif %}
 
+  {% if messages %}
+      {% for message in messages %}
+          <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}">{{ message }}</div>
+      {% endfor %}
+  {% endif %}
+  <h2 class="text-center mb-4">Complaints List</h2>
   <!-- Search Box -->
     <div class="mb-3 d-flex justify-content-between align-items-center">
         <!-- Left: Create Complaint Link -->
@@ -26,10 +42,11 @@
            <th>Flat</th>
           {% endif %}
           <th>Category</th>
-          <th>Priority</th>
           <th>Status</th>
+          <th>Priority</th>
           <th>Description</th>
           <th>Date</th>
+          <th>Action</th>
         </tr>
       </thead>
       <tbody>
@@ -54,38 +71,27 @@
           </td>
           <td>
             {% if object.priority.value == 'Low' %}
-                <span class="badge bg-secondary">{{ object.status }}</span>
+                <span class="badge bg-secondary">{{ object.priority }}</span>
             {% elif object.priority.value == 'Medium' %}
-                <span class="badge bg-warning">{{ object.status }}</span>
+                <span class="badge bg-warning">{{ object.priority }}</span>
             {% elif object.priority.value == 'High' %}
-                <span class="badge bg-danger">{{ object.status }}</span>
-
+                <span class="badge bg-danger">{{ object.priority }}</span>
             {% endif %}
           </td>
           <td>
             {% if object.description|length > 50 %}
               {{ object.description|truncatechars:30 }}...
               <a href="#" class="text-primary" data-bs-toggle="modal" data-bs-target="#descModal{{ object.id }}">Show More</a>
-
-              <!-- Modal -->
-              <div class="modal fade" id="descModal{{ object.id }}" tabindex="-1" aria-labelledby="descModalLabel{{ object.id }}" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-scrollable">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title" id="descModalLabel{{ object.id }}">Complaint Description</h5>
-                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                      {{ object.description }}
-                    </div>
-                  </div>
-                </div>
-              </div>
             {% else %}
               {{ object.description }}
             {% endif %}
           </td>
           <td>{{ object.created_at }}</td>
+          <td>
+            <a href="{% url 'complaint-update' object.uid %}" type="button" class="btn btn-outline-success btn-sm">
+            Edit
+            </a>
+          </td>
         </tr>
         {% empty %}
         <tr><td colspan="5" class="text-center">No complaints found.</td></tr>

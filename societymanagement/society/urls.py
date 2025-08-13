@@ -15,6 +15,9 @@ urlpatterns = [
     path('vehicle-entries-list/', VehicleEntriesListView.as_view(), name='vehicle-entries-list'),
     path('create-visitor-request/', VisitorRequestCreateView.as_view(), name="create-visitor-request"),
     path('visitor-list/', VisitorRequestListView.as_view(), name='visitor-list'),
-    path('visitor/<int:pk>/approve-reject/', ApproveRejectVitisorUpdateView.as_view(), name="visitor-approve-reject")
+    path('visitor/<int:pk>/approve-reject/', ApproveRejectVitisorUpdateView.as_view(), name="visitor-approve-reject"),
+    path('complaint-update/<uuid:uid>/', ComplaintUpdateView.as_view(), name="complaint-update"),
+    path('create-new-feed/', PublishNoticeCreateView.as_view(), name="create-new-feed"),
+    path('notice-feed', NoticeBoardView.as_view(), name="notice-feed"),
     # path('profile/', views.ProfileView.as_view(), name='profile'),
 ]
