@@ -52,12 +52,23 @@
                           {{ form.password }}
                         </div>
 
+                         <div class="row mb-3 text-center">
+                            <div class="col-md-6">
+                                <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault">
+                                <label class="form-check-label" for="flexCheckDefault">Remember me</label>
+                            </div>
+                            <div class="col-md-6">
+                              <p class="">
+                                <a href="{% url 'registration' %}" style="text-decoration: none;">Password Forgot?</a>
+                              </p>
+                            </div>
+                        </div>
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary">LOGIN</button>
                         </div>
                     </form>
                     <p class="text-center mt-3 mb-0">
-                      Don't have an account? <a href="{% url 'registration' %}">Register Now</a>
+                      Don't have an account? <a href="{% url 'registration' %}" style="text-decoration: none;">Register Now</a>
                     </p>
                   </div>
               </div>

@@ -67,6 +67,7 @@ class CustomUserForm(UserCreationForm):
                 field.widget.attrs['class'] = 'form-control text-uppercase'
             else:
                 field.widget.attrs['class'] = 'form-control'
+                
     def clean(self):
         cleaned_data = super().clean()
         for field_name, value in cleaned_data.items():

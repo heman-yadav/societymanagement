@@ -111,3 +111,13 @@ class Notice(models.Model):
         return self.title
 
 
+class ProfileImage(models.Model):
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='profile')
+    
+    image = models.ImageField(upload_to='staff_profiles/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    # def __str__(self):
+    #     return self.id
+
+

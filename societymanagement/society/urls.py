@@ -19,5 +19,6 @@ urlpatterns = [
     path('complaint-update/<uuid:uid>/', ComplaintUpdateView.as_view(), name="complaint-update"),
     path('create-new-feed/', PublishNoticeCreateView.as_view(), name="create-new-feed"),
     path('notice-feed', NoticeBoardView.as_view(), name="notice-feed"),
+    path('administration-info/', AdministrationInfoListView.as_view(), name="administration-info")
     # path('profile/', views.ProfileView.as_view(), name='profile'),
 ]

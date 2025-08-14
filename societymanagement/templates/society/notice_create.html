@@ -28,7 +28,7 @@
         {% endif %}
 
         <!-- Complaint Form -->
-        <form method="post" novalidate>
+        <form method="post" enctype="multipart/form-data" novalidate>
             {% csrf_token %}
             <div class="row mb-3">
                 <div class="col-md-6">
@@ -38,6 +38,7 @@
                 <div class="col-md-6">
                     <label for="image" class="form-label">{{form.image.label }}</label>
                     {{ form.image }}
+                    <small id="imgHelp" class="form-text text-muted">Image size < 2 MB | Format: .jpg.png.svg</small>
                 </div>
             </div>
 

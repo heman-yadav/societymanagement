@@ -7,14 +7,14 @@
     <div class="container mb-2">
         <div class="row">
             {% if request.user.is_superuser %}
-            <div class="col">
-                <a href="{% url 'complaints' %}" class="btn btn-light">
+            <div class="col-5">
+                <a href="{% url 'create-new-feed' %}" class="btn btn-light">
                     Create Notice
                 </a>
             </div>
             {% endif %}
             <div class="col">
-                <h3 class="fw-bold text-center">Notice Board</h3>
+                <h3 class="fw-bold">Notice Board</h3>
             </div>
         </div>
     </div>

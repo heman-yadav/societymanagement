@@ -12,6 +12,8 @@ from django.urls import reverse_lazy
 from .forms import *
 from .utils import send_email
 from datetime import datetime
+from PIL import Image
+from io import BytesIO
 
 # Create your views here.
 class RegistrationView(CreateView):
@@ -51,9 +53,23 @@ class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
     template_name = "society/user_profile_update.html"
     success_url = reverse_lazy('dashboard')
 
-    
     def get_object(self, queryset=None):
         return get_object_or_404(self.model, uid=self.kwargs['uid'])
+    
+    def form_valid(self, form):
+        form_data = form.save(commit=False)
+        self.request.POST.get('profile_image')
+        image = self.request.FILES.get('profile_image')
+        print('image', image)
+        if image:
+                check = ProfileImage.objects.filter(user=self.request.user).first()
+                if not check:
+                    ProfileImage.objects.create(user=self.request.user, image=image)
+                else:
+                    check.image = image
+                    check.save()
+        form_data.save()
+        return super().form_valid(form)
 
 
 class LoginView(View):
@@ -238,14 +254,14 @@ class ApproveRejectVitisorUpdateView(LoginRequiredMixin, View):
             elif visitor.status.value == 'Pending':    
                 if action == "Approved":
                     visitor.status = status
-                    messages.success(self.request, "Visitor Request Approved Successfully.")
+                    messages.success(self.request, "Visitor request approved successfully.")
                 elif action == "Rejected":
                     visitor.status = status
-                    messages.success(self.request, "Visitor Request Rejected Successfully.")
+                    messages.success(self.request, "Visitor request rejected successfully.")
             elif visitor.status.value == 'Rejected':    
                 if action == "Approved":
                     visitor.status = status
-                    messages.success(self.request, "Visitor Request Approved Successfully.")
+                    messages.success(self.request, "Visitor request approved successfully.")
             visitor.approved_by = self.request.user
             visitor.approved_at = datetime.now()
             visitor.save()
@@ -267,6 +283,29 @@ class NoticeBoardView(LoginRequiredMixin, ListView):
     
 class PublishNoticeCreateView(LoginRequiredMixin, CreateView):
     model = Notice
-    template_name = "notice_create.html"
+    template_name = "society/notice_create.html"
     form_class = PublishNoticeInfoForm
     success_url = reverse_lazy('notice-feed')
+    IMAGE_MAX_MB = 2
+
+    def form_valid(self, form):
+        try:
+            form_data =  form.save(commit=False)
+            image = form.cleaned_data['image']
+            im = Image.open(BytesIO(image.read()))
+            if im.format not in ('PNG', 'JPEG', 'GIF', 'JPE'):
+                    raise ValidationError("Unsupported image type. Please upload PNG, JPEG, or GIF.")
+            if image.size > self.IMAGE_MAX_MB * 1024 * 1024:
+                raise ValidationError("Your file size greater then 2 MB")
+            form_data.save()
+            messages.success(self.request, "Your notice published successfully")
+            return super().form_valid(form)
+        except Exception as error:
+            messages.error(self.request, "something went wrong!")
+            return super().form_valid(form)
+            
+            
+class AdministrationInfoListView(LoginRequiredMixin, ListView):
+    model = CustomUser
+    template_name = 'society/administration_info.html'
+    context_object_name = 'staff_list'

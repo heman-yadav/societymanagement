@@ -1,0 +1,71 @@
+{% extends "society/base.html" %}
+{% load static %}
+{% block content %}
+<div class="container py-4">
+    <h2 class="text-center mb-4">Society Management & Staff</h2>
+    
+    <div class="row g-4">
+        {% for person in staff_list %}
+        <div class="col-md-6 col-lg-6">
+            <div class="card staff-card p-1">
+                <div class="card-body d-flex align-items-center">
+                    <img src="{{ person.profile.image.url }}" alt="Profile Picture" class="staff-img"
+                         style="width: 100px; height: 100px; object-fit: cover; border-radius: 9%;">
+                    <div class="staff-info ms-3">
+                        <h5>{{ person.get_full_name }}</h5>
+                        <div class="contact-info">
+                            <p class="card-name"><strong>Flat:</strong> {{ person.flat }}</p>
+                            <p class="card-name"><strong>Mobile:</strong> <a href="tel:{{ person.mobile }}">{{ person.mobile }}</a></p>
+                            {% if person.whatsapp %}
+                            <p class="card-name"><strong>WhatsApp:</strong> 
+                                <a href="https://wa.me/{{ person.whatsapp }}" target="_blank">{{ person.whatsapp }}</a>
+                            </p>
+                            {% endif %}
+                            <p class="card-name"><strong>Email:</strong> <a href="mailto:{{ person.email }}">{{ person.email }}</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-center">No staff members found.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+{% block extra_css %}
+<style>
+    .card-name {
+        margin-bottom: 0px;
+    }
+
+    .staff-card {
+        border-radius: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        background-color: #fff;
+    }
+    .staff-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    .staff-img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 50%;
+    }
+    .staff-info h5 {
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    .contact-info {
+        font-size: 0.9rem;
+        color: #555;
+    }
+    .contact-info a {
+        text-decoration: none;
+        color: #007bff;
+    }
+</style>
+{% endblock %}
