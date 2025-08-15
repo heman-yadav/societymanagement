@@ -45,7 +45,8 @@ class RegistrationView(CreateView):
                 message_body=f"Dear {first_name} {last_name}, We have received your complaint. Our concern persorn will contact you soon."
             )
         return super().form_valid(form)
-    
+
+
 class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
     model = CustomUser
     slug_field = 'uid'
@@ -70,6 +71,21 @@ class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
                     check.save()
         form_data.save()
         return super().form_valid(form)
+
+
+# class ComplaintListView(LoginRequiredMixin, ListView):
+#     model = CustomUser
+#     paginate_by = 7
+#     template_name = 'society/complaints.html'
+
+#     def get_queryset(self):
+#         qs = super().get_queryset()
+
+#         # Admins can see all complaints
+#         if self.request.user.is_staff or self.request.user.is_superuser:
+#             return qs
+#         # Normal users see only their own complaints
+#         return qs.filter(user=self.request.user)
 
 
 class LoginView(View):
@@ -224,6 +240,7 @@ class VisitorRequestCreateView(LoginRequiredMixin, CreateView):
         # )
         return response
     
+
 class VisitorRequestListView(LoginRequiredMixin, ListView):
     model = VisitorEntries
     paginate_by = 7
@@ -238,9 +255,6 @@ class VisitorRequestListView(LoginRequiredMixin, ListView):
         # Normal users see only approve and reject their visitors request
         return qs.filter(flat=self.request.user)
 
-# class ApproveRejectVitisorUpdateView(LoginRequiredMixin, UpdateView):
-#     model = VisitorEntries
-#     success_url = "visitor-list"
 
 class ApproveRejectVitisorUpdateView(LoginRequiredMixin, View):
     def post(self, request, pk):
@@ -280,7 +294,8 @@ class NoticeBoardView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         return Notice.objects.order_by('-created_at')
-    
+
+
 class PublishNoticeCreateView(LoginRequiredMixin, CreateView):
     model = Notice
     template_name = "society/notice_create.html"
