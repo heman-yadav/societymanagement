@@ -1,0 +1,69 @@
+{% extends 'society/base.html' %}
+{% block title %}PhonePe Payment Demo{% endblock %}
+{% block content %}
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+
+        <div class="card shadow-sm mb-4">
+          <div class="card-body text-center">
+            <h3 class="mb-4">Society Payment Page - Demo page</h3>
+            <form method="post">
+              {% csrf_token %}
+              <div class="row">
+                  <div class="col-6">
+                      <label for="type" class="form-label">{{ form.type.label }}</label>
+                      {{ form.type }}
+                  </div>
+                  <div class="col-6">
+                      <label for="amount" class="form-label">{{ form.amount.label }}</label>
+                      {{ form.amount }}
+                  </div>
+              </div>
+              {{ form.type_amount_map }}
+              
+              <div class="d-grid gap-2 py-5">
+              <button type="submit" class="btn btn-success btn-lg w-100">
+                Pay Now
+              </button>
+              </div>
+            </form>
+            <div class="text-center mb-3">
+            <a href="{% url 'payment-transaction-list' %}" class="text-decoration-none">List of Pyments</a>
+        </div>
+          </div>
+        </div>
+
+        <div class="text-center">
+          <small class="text-muted">
+            Works on both desktop and mobile devices.<br>
+            On mobile, tap will redirect to the PhonePe app for UPI payment.
+          </small>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const typeSelect = document.getElementById('id_type');
+        const amountInput = document.getElementById('id_amount');
+        const hiddenMapInput = document.getElementById('id_type_amount_map');
+
+        // Parse the JSON data from the hidden input
+        const typeAmountMap = JSON.parse(hiddenMapInput.value.replace(/'/g, '"'));
+
+        typeSelect.addEventListener('change', function() {
+            const selectedType = this.value;
+            if (selectedType in typeAmountMap) {
+                amountInput.value = typeAmountMap[selectedType];
+            } else {
+                amountInput.value = '';
+            }
+        });
+    });
+  </script>
+{% endblock %}
+

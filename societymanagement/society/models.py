@@ -133,17 +133,5 @@ class ProfileImage(models.Model):
     def __str__(self):
         return self.user.first_name
     
-    class PaymountMaster(models.Model):
-        uid = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
-        type = models.CharField(max_length=100, blank=True, null=True)
-        amount = models.PositiveIntegerField()
-        is_visible = models.BooleanField(default=False)
-        remark = models.CharField(max_length=200, blank=True, null=True)
-        author = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='payment_author')
-        created = models.DateTimeField(auto_now=True)
-        updated = models.DateTimeField(auto_now=True)
-
-        def __str__(self):
-            return self.type + " " + self.amount
 
 

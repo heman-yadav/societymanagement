@@ -73,19 +73,19 @@ class UserProfileUpdateView(LoginRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
-# class ComplaintListView(LoginRequiredMixin, ListView):
-#     model = CustomUser
-#     paginate_by = 7
-#     template_name = 'society/complaints.html'
+class ComplaintListView(LoginRequiredMixin, ListView):
+    model = CustomUser
+    paginate_by = 7
+    template_name = 'society/complaints.html'
 
-#     def get_queryset(self):
-#         qs = super().get_queryset()
+    def get_queryset(self):
+        qs = super().get_queryset()
 
-#         # Admins can see all complaints
-#         if self.request.user.is_staff or self.request.user.is_superuser:
-#             return qs
-#         # Normal users see only their own complaints
-#         return qs.filter(user=self.request.user)
+        # Admins can see all complaints
+        if self.request.user.is_staff or self.request.user.is_superuser:
+            return qs
+        # Normal users see only their own complaints
+        return qs.filter(user=self.request.user)
 
 
 class LoginView(View):

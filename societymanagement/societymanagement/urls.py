@@ -21,7 +21,9 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('society.urls')),  # Register app URLs here
+    # Register apps URL here
+    path('', include('society.urls')),
+    path('payment/', include('paymentapp.urls'))
 ]
 
 if settings.DEBUG:

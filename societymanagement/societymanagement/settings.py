@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 from pathlib import Path
+from . import config_reader
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'society',
+    "paymentapp",
     'widget_tweaks'
 ]
 
@@ -74,6 +76,16 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/dashboard/'
 LOGOUT_REDIRECT_URL = '/login/'
 LOGOUT_REDIRECT_URL = '/login/'
+
+# Get the configuration data
+# This will be a dictionary containing the JSON data
+APP_CONFIG = config_reader.CONFIG['payment_parms']
+
+# Sandbox credentials
+PHONEPE_MERCHANT_ID = 'PGTESTPAYUAT86'
+PHONEPE_SALT_KEY = '96434309-7796-489d-8924-ab56988a6076'
+PHONEPE_SALT_INDEX = 1
+PHONEPE_HOST = 'https://api-preprod.phonepe.com/apis/pg-sandbox'
 
 
 # Database
